@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -15,10 +16,18 @@ public class MainManager : MonoBehaviour
     
     private bool m_Started = false;
     private int m_Points;
-    
-    private bool m_GameOver = false;
 
-    
+    private bool m_GameOver = false;
+    public Text nombreJugador;
+    public string textoMax;
+    public int maxPunt;
+
+
+    private void Awake()
+    {
+        MenuManager.Instance.LoadScore();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,19 +45,24 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        
     }
 
     private void Update()
     {
         if (!m_Started)
         {
+            MenuManager.Instance.SaveScore();
+            nombreJugador.text = PuntuacionJugador();
             if (Input.GetKeyDown(KeyCode.Space))
             {
+
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
-
+                
                 Ball.transform.SetParent(null);
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
             }
@@ -70,7 +84,23 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (m_Points > MenuManager.Instance.maxPunt)
+        {
+            MenuManager.Instance.maxPunt = m_Points;
+        }
         m_GameOver = true;
+        PuntuacionJugador();
+        MenuManager.Instance.record = textoMax;
         GameOverText.SetActive(true);
+        
+        
+        MenuManager.Instance.SaveScore();
+    }
+
+    public string PuntuacionJugador()
+    {
+        textoMax = "Best score: " + MenuManager.Instance.name + " " + MenuManager.Instance.maxPunt;
+        
+        return textoMax;
     }
 }
